@@ -1,0 +1,223 @@
+```{r echo=FALSE}
+install_if_needed <- function(package_name){
+  if(!length(grep(package_name, rownames(installed.packages()), value = TRUE))){
+    install.packages(package_name)
+    }
+}
+working_directory <- "C:/Users/sanjidr/Desktop/DataSciencePresentation/"
+setwd(working_directory)
+```
+
+Application of data science in business problems using R
+========================================================
+author: Sanjid Rahman
+date: `r Sys.Date()`
+autosize: true
+
+SocialId: @sanjid25
+
+Agenda
+========================================================
+- Understanding Data Science? 
+- Analytics: retrospective reporting -> predicting
+- Use case with Customer Segmentation
+- Use case with Market Basket Analysis
+
+Running Data
+========================================================
+- R packages used:
+  - `data.table`
+  - `openxlsx`
+  - `arules`
+- Global Superstore 2016v2
+  - <https://community.tableau.com/docs/DOC-10915>
+- Concept of sales is transferable in other fields
+
+
+Quick overview of the data
+========================================================
+```{r echo=FALSE}
+install_if_needed("data.table"); require(data.table)
+install_if_needed("openxlsx"); require(openxlsx)
+dta <- data.table(read.xlsx(paste0(working_directory, "Global Superstore Orders 2016.xlsx"), detectDates = TRUE))
+```
+- Number of rows / observations: `r dim(dta)[1]`
+- Number of columns / fields: `r dim(dta)[2]`
+- Field names: `r names(dta)`
+
+Data Science Definitions
+========================================================
+![Data Science Definition](DataScienceDefinition.png)
+
+Data Science Venn Diagrams
+========================================================
+<img src="DataScienceVennDiagram.png" width="400" height="400" />
+
+
+Rudimentary Statistics
+========================================================
+- Aggregate values: count, sum, measure of center tendencies
+- Hypothesis tests
+  - Error types: 1. false fire alarm; 2. missed alarm
+
+Rudimentary Statistics [data]
+========================================================
+- Regression (with sky tower)
+  - equation of a line
+  - gotta imagine dimensions > 2
+  - danger of overfitting
+
+Rudimentary Programming
+========================================================
+- Variables when values appear to repeat; e.g. GST
+- Loops when lines appear to repeat; e.g. Promotions
+- Functions when a bunch of lines are "dubbable";
+
+Rudimentary Programming [data]
+========================================================
+- Relational Model:
+  - SELECT, WHERE, ORDER BY
+  - GROUP BY, AGGREGATE
+  - JOIN
+- NOSQL Model; e.g. Neo4j overcomes:
+  - expensive JOINs
+  - Self-joins
+  - frequent schema changes
+
+Rudimentary Programming [data example]
+========================================================
+- example with `GROUP BY` and aggregate function `COUNT`
+```{r}
+dta[, .N, by = Segment]
+```
+
+Rudimentary Programming [data example] continued
+========================================================
+```{r}
+dta[Segment == "Corporate", # filter or where clause
+    .(Total.Sales = sum(Sales)), # aggregate function
+    by = Customer.Name][ # group by
+    order(Total.Sales, na.last = TRUE, decreasing = TRUE)] # order by
+```
+
+
+Advanced Statistics 
+========================================================
+- Machine Learning (black box but hyperparameters)
+  - Gradient Descent
+  - Learning Rate
+- Big Datasets
+  - Image Classification
+  - Self-driven cars
+- Training Set and Test Set
+
+Advanced Programming 
+========================================================
+<img src="TraditionalProgramming.png" width="600" height="200" />
+
+<img src="MachineLearningProgramming.png" width="600" height="200" />
+
+Simpler Definition of a Data Scientist
+========================================================
+Just a really good scientist
+- ensures work is reproducible
+- does best possible work with limited and/or mediocre data
+- enumerates errors
+
+Customer Segmentation Theory
+========================================================
+
+| CustomerID | Recency  | Frequency | Monetary |
+|-----------:|:---------|-----------|:--------:|
+| Customer A | 2        |         5 |       5  |
+| Customer B | 5        |         4 |       3  |
+| Customer C | 0        |         5 |       5  |
+
+- Recency: Last date of purchase
+- Frequency: How often they purchase
+- Monetary: How much do they spend
+- Tenure: How long have they been around
+- Breadth: How much variety in purchase
+
+Customer Segmentation Code
+========================================================
+```{r}
+dta[, .(Recency = max(Order.Date), 
+        Frequency = uniqueN(Order.Date), 
+        Monetary = sum(Sales), 
+        Tenure = max(Order.Date) - min(Order.Date), 
+        Breadth = uniqueN(Product.ID))]
+```
+
+
+Customer Segmentation Data
+========================================================
+- add: `, by = Customer.Name` at the end of the code
+```{r echo = FALSE, out.width="90px", out.height="120px"}
+(cus_dta <- dta[, .(Recency = max(Order.Date), Frequency = uniqueN(Order.Date), Monetary = sum(Sales), Tenure = max(Order.Date) - min(Order.Date)), by = Customer.Name])
+```
+
+Customer Segmentation Plots (Recency)
+========================================================
+```{r} 
+plot(cus_dta$Recency, ylab = "Recency")
+```
+
+Customer Segmentation Plots (Frequency)
+========================================================
+```{r} 
+plot(cus_dta$Frequency, ylab = "Frequency")
+```
+
+Customer Segmentation Plots (Monetary)
+========================================================
+```{r} 
+plot(cus_dta$Monetary, ylab = "Monetary")
+```
+
+Market Basket Analysis Setup
+========================================================
+```{r}
+dta[, .N, by = Order.ID]
+```
+
+Market Basket Analysis Theory
+========================================================
+
+If (antecedent) Then (consequent) rules
+
+- Support: proportion of items of rule in entire set of transactions
+- Confidence: proportions of items of the rule in the set of transactions with `if`
+- Lift: confidence divided expected confidece; 
+  - chance that rule is merely not coincidence
+
+<https://infocenter.informationbuilders.com/wf81rel/index.jsp?topic=%2Fpubdocs%2FRStat16%2Fsource%2Ftopic49.htm>
+
+```{r echo = FALSE}
+library(arules)
+write.table(dta[, .(Transaction = paste(Product.Name, collapse = ", ")), by = Order.ID][, -"Order.ID"], "~/transactions.csv", row.names = FALSE, sep = ";", quote = FALSE)
+transactions <- read.transactions("~/transactions.csv", sep = ";")
+```
+
+Market Basket Analysis Inspection
+========================================================
+```{r}
+itemFrequencyPlot(transactions, topN = 10)
+```
+
+Market Basket Analysis Rules
+========================================================
+```{r echo = TRUE}
+rules <- apriori(transactions, parameter = list(support = 0.00001))
+```
+
+Market Basket Analysis Rules
+========================================================
+```{r echo = TRUE}
+inspect(sort(rules, by = "confidence")[1:3])
+```
+
+- <https://www.kaggle.com/sanjid25/kernel1879edaa2d>
+
+Questions
+========================================================
