@@ -8,13 +8,28 @@
 Running dataset
 https://community.tableau.com/s/question/0D54T00000C6SvOSAV/where-is-the-global-superstore-returns-file
 
-[ ] Packages 101
+[ ] R 101: Wrangling
 	[ ] data.table
 	[ ] sqldf
 	[ ] openxlsx
-	[ ] ggplot
 
-[ ] Packages 201
+[ ] R 201: Visualisation and Reporting
+	[ ] ggplot
+	[ ] rmarkdown
+	[ ] shiny
+
+[ ] R 202: Statistics and Machine Learning
+	[ ] sd with lapply
+	[ ] rpart and rpart.plot
+
+[ ] R 301: Pipelines, ETL and API
 	[ ] DBI / RMariaDB
 	[ ] `httr` with `jsonlite`
+
+[ ] R 401: Deployment
+	[ ] Packages with github
+	[ ] plumber
+	[ ] shiny.io
+	[ ] dockerized shiny apps
+	[ ] dockerized models
 
