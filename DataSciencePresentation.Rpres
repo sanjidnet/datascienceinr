@@ -14,7 +14,7 @@ author: Sanjid Rahman
 date: `r Sys.Date()`
 autosize: true
 
-SocialId: @sanjid25
+SocialId: @sanjidnet
 
 Agenda
 ========================================================
@@ -142,11 +142,12 @@ Customer Segmentation Theory
 Customer Segmentation Code
 ========================================================
 ```{r}
-dta[, .(Recency = max(Order.Date), 
-        Frequency = uniqueN(Order.Date), 
-        Monetary = sum(Sales), 
-        Tenure = max(Order.Date) - min(Order.Date), 
-        Breadth = uniqueN(Product.ID))]
+dta[, .(
+    Recency = max(Order.Date), 
+    Frequency = uniqueN(Order.Date), 
+    Monetary = sum(Sales), 
+    Tenure = max(Order.Date) - min(Order.Date), 
+    Breadth = uniqueN(Product.ID))]
 ```
 
 
