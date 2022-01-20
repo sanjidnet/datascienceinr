@@ -20,7 +20,7 @@ https://community.tableau.com/s/question/0D54T00000C6SvOSAV/where-is-the-global-
 
 [ ] R 202: Statistics and Machine Learning
 	[ ] sd with lapply
-	[ ] rpart and rpart.plot
+	[ ] rpart and rpart.plot (using iris dataset)
 
 [ ] R 301: Pipelines, ETL and API
 	[ ] DBI / RMariaDB
